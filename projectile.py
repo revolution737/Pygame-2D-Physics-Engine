@@ -79,9 +79,6 @@ while running:
         radius
     )
 
-    # if vy == 0:
-    #     y = 100
-
     # --- Debug text ---
     debug_lines = [
     f"x: {x:.1f}",
