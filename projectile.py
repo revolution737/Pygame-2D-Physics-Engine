@@ -11,7 +11,7 @@ circle_color = (200, 255, 255)
 floor_color = (200, 200, 200)
 
 gravity = 1000 #pixels per second squared
-restitution = 0.4
+restitution = 0.8
 
 # -----------------------------
 # Initialization
@@ -26,12 +26,13 @@ font = pygame.font.SysFont(None, 24)
 # -----------------------------
 # Physics state
 # -----------------------------
-x = width // 2
-y = 100          # start near the top
-vy = 0           # vertical velocity (px/s)
+x = 100
+y = 300     
+vx = 100
+vy = -500          
 radius = 30
 
-floor_y = height - 50
+floor_y = height - 100
 
 # -----------------------------
 # Main Loop
@@ -49,6 +50,7 @@ while running:
     # --- Physics update ---
     vy += gravity * dt      # v = v + a·dt
     y += vy * dt            # y = y + v·dt
+    x += vx * dt
      # Floor collision
     if y + radius >= floor_y:
         y = floor_y - radius
@@ -77,12 +79,14 @@ while running:
         radius
     )
 
-    if vy == 0:
-        y = 100
+    # if vy == 0:
+    #     y = 100
 
     # --- Debug text ---
     debug_lines = [
-    f"vx: 0",
+    f"x: {x:.1f}",
+    f"y:{y:.1f}",
+    f"vx: {vx:.1f}",
     f"vy: {vy:.1f}",
     f"g: {gravity}",
     f"restitution: {restitution}"
