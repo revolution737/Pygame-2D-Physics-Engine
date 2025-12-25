@@ -18,7 +18,7 @@ restitution = 0.8
 # -----------------------------
 pygame.init()
 screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption("2D Physics Engine")
+pygame.display.set_caption("2D projectile")
 clock = pygame.time.Clock()
 
 font = pygame.font.SysFont(None, 24)
