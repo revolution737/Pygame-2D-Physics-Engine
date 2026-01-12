@@ -7,7 +7,7 @@ width, height = 800, 600
 fps = 60
 bgcolor = (20, 20, 20)
 
-G = 40.0
+G = 60.0
 
 # Initialization
 pygame.init()
@@ -23,9 +23,9 @@ bodies = [
     {
         "x": width // 2 - 60,
         "y": height // 2,
-        "vx": 0,
-        "vy": -28,
-        "m": 1500,
+        "vx": 45,
+        "vy": -45,
+        "m": 15000,
         "r": 6,
         "color": (255, 180, 180),
         "ax": 0,
@@ -35,9 +35,9 @@ bodies = [
     {
         "x": width // 2 + 60,
         "y": height // 2,
-        "vx": 0,
-        "vy": 28,
-        "m": 1500,
+        "vx": -45,
+        "vy": 45,
+        "m": 15000,
         "r": 6,
         "color": (180, 180, 255),
         "ax": 0,
@@ -47,10 +47,10 @@ bodies = [
     {
         "x": width // 2,
         "y": height // 2 - 180,
-        "vx": 38,
-        "vy": 0,
-        "m": 300,
-        "r": 4,
+        "vx": -45,
+        "vy": -45,
+        "m": 15000,
+        "r": 6,
         "color": (180, 255, 180),
         "ax": 0,
         "ay": 0,
@@ -97,7 +97,10 @@ while running:
             ux = dx / distance
             uy = dy / distance
 
-            force = G * bi["m"] * bj["m"] / (distance * distance)
+            softenting = 20
+            force = (
+                G * bi["m"] * bj["m"] / (distance * distance + softenting * softenting)
+            )
 
             Fx = force * ux
             Fy = force * uy
@@ -155,7 +158,7 @@ while running:
     y_offset = 10
     for line in debug_lines:
         text_surface = font.render(line, True, (255, 255, 255))
-        text_rect = text_surface.get_rect(topleft=(width - 800, y_offset))
+        text_rect = text_surface.get_rect(topleft=(10, y_offset))
         screen.blit(text_surface, text_rect)
         y_offset += text_surface.get_height() + 2
 
