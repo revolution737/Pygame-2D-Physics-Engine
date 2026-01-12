@@ -8,4 +8,10 @@ projectile.py
 twobody.py
 ![twobody](https://github.com/user-attachments/assets/dd168536-a847-434b-9569-3fc0e116f58a)
 
+threebody.py
+![threebody](https://github.com/user-attachments/assets/06457e80-5751-48d9-9414-065a44eaa352)
+
+
+
+
 
