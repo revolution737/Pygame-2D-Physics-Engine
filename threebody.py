@@ -150,9 +150,9 @@ while running:
         f"m2: {b2["m"]:.1f}",
         f"m3: {b3["m"]:.1f}",
         f"G: {G}",
-        f"Distance(1-2): {d12}",
-        f"Distance(1-3): {d13}",
-        f"Distance(2-3): {d23}",
+        f"Distance(1-2): {d12:.1f}",
+        f"Distance(1-3): {d13:.1f}",
+        f"Distance(2-3): {d23:.1f}",
     ]
 
     y_offset = 10
