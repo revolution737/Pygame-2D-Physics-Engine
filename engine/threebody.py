@@ -30,6 +30,7 @@ bodies = [
         "color": (255, 180, 180),
         "ax": 0,
         "ay": 0,
+        "trail": []
     },
     # Star B
     {
@@ -42,6 +43,7 @@ bodies = [
         "color": (180, 180, 255),
         "ax": 0,
         "ay": 0,
+        "trail": []
     },
     # Third body (outer orbit)
     {
@@ -54,6 +56,7 @@ bodies = [
         "color": (180, 255, 180),
         "ax": 0,
         "ay": 0,
+        "trail": []
     },
 ]
 
@@ -119,9 +122,22 @@ while running:
         b["x"] += b["vx"] * dt
         b["y"] += b["vy"] * dt
 
+        b["trail"].append((b["x"],b["y"]))
+        if len(b["trail"]) > 300:
+            b["trail"].pop(0)
+
     # Render
     screen.fill(bgcolor)
 
+    for body in bodies:
+        if len(body["trail"]) > 1:
+            pygame.draw.lines(
+                screen,
+                body["color"],
+                False,
+                body["trail"],
+                1
+            )
     for body in bodies:
         pygame.draw.circle(
             screen, body["color"], (int(body["x"]), int(body["y"])), body["r"]
