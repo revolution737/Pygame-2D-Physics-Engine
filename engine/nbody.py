@@ -98,7 +98,8 @@ for b in bodies:
 # Main Loop
 running = True
 while running:
-    dt = clock.tick(fps) / 1000.0
+    clock.tick(fps)
+    dt = 1/60
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
