@@ -46,7 +46,7 @@ The difference is visible in the energy graphs below.
 
 | RK4 | Euler |
 |-----|-------|
-| Flat baseline until a genuine close encounter at t≈6, then stable again
+| Flat baseline until a genuine close encounter at t≈6, then stable again |
 | Oscillating baseline from the start, energy artificially injected on every close encounter, catastrophic ejection at t≈14 |
 
 Both systems eventually eject a body under these conditions — but RK4's ejection is a real physical event caused by an extreme close encounter. Euler's ejection is caused by accumulated numerical error artificially pumping energy into the system on every interaction until the system destabilizes.
