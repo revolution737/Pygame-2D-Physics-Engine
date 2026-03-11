@@ -70,19 +70,6 @@ bodies = [
         "ax": 0,
         "ay": 0,
         "trail": [],
-    },
-    # n = 5
-    {
-        "x": width // 2,
-        "y": height // 2,
-        "vx": 0,
-        "vy": -45,
-        "m": 15000,
-        "r": 6,
-        "color": (180, 255, 255),
-        "ax": 0,
-        "ay": 0,
-        "trail": [],
     }
 ]
 
@@ -95,6 +82,54 @@ for b in bodies:
     b["vx"] -= px / total_mass
     b["vy"] -= py / total_mass
 
+# Flat array to store states for RK4
+state = []
+for b in bodies:
+    state += [b["x"], b["y"], b["vx"], b["vy"]]
+
+def derivatives(state):
+    n = len(bodies)
+    ax = [0.0] * n
+    ay = [0.0] * n
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            xi, yi = state[i*4], state[i*4 + 1]
+            xj, yj = state[j*4], state[j*4 + 1]
+
+            dx = xj - xi
+            dy = yj - yi
+            distance = math.hypot(dx, dy)
+
+            if distance == 0:
+                continue
+
+            softenting = 20
+            force = G * bodies[i]["m"] * bodies[j]["m"] / (distance * distance + softenting * softenting)
+
+            ax[i] += force * (dx / distance) / bodies[i]["m"]
+            ay[i] += force * (dy / distance) / bodies[i]["m"]
+            ax[j] -= force * (dx / distance) / bodies[j]["m"]
+            ay[j] -= force * (dy / distance) / bodies[j]["m"]
+
+    ds = []
+    for i in range(n):
+        ds += [state[i*4+2], state[i*4+3], ax[i], ay[i]]
+
+    return ds
+
+
+def rk4_step(state, dt):
+    k1 = derivatives(state)
+    k2 = derivatives([state[i] + dt / 2 * k1[i] for i in range(len(state))])
+    k3 = derivatives([state[i] + dt / 2 * k2[i] for i in range(len(state))])
+    k4 = derivatives([state[i] + dt * k3[i] for i in range(len(state))])
+
+    return [
+        state[i] + dt / 6 * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i])
+        for i in range(len(state))
+    ]
+
 # Main Loop
 running = True
 while running:
@@ -105,50 +140,13 @@ while running:
         if event.type == pygame.QUIT:
             running = False
 
-    # Reset accelerations
-    for b in bodies:
-        b["ax"] = 0
-        b["ay"] = 0
-    # Physics update
-    for i in range(len(bodies)):
-        for j in range(i + 1, len(bodies)):
+    state = rk4_step(state, dt)
 
-            bi = bodies[i]
-            bj = bodies[j]
-
-            dx = bj["x"] - bi["x"]
-            dy = bj["y"] - bi["y"]
-
-            distance = math.hypot(dx, dy)
-
-            if distance == 0:
-                continue
-
-            ux = dx / distance
-            uy = dy / distance
-
-            softenting = 20
-            force = (
-                G * bi["m"] * bj["m"] / (distance * distance + softenting * softenting)
-            )
-
-            Fx = force * ux
-            Fy = force * uy
-
-            # Newton's 3rd law (equal & opposite)
-            bi["ax"] += Fx / bi["m"]
-            bi["ay"] += Fy / bi["m"]
-
-            bj["ax"] -= Fx / bj["m"]
-            bj["ay"] -= Fy / bj["m"]
-
-    for b in bodies:
-        b["vx"] += b["ax"] * dt
-        b["vy"] += b["ay"] * dt
-
-        b["x"] += b["vx"] * dt
-        b["y"] += b["vy"] * dt
-
+    for i, b in enumerate(bodies):
+        b["x"] = state[i*4]
+        b["y"] = state[i*4+1]
+        b["vx"] = state[i*4+2]
+        b["vy"] = state[i*4+3]
         b["trail"].append((b["x"], b["y"]))
         if len(b["trail"]) > 300:
             b["trail"].pop(0)

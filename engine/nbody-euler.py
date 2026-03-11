@@ -12,7 +12,7 @@ G = 60.0
 # Initialization
 pygame.init()
 screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption("Three Bodies")
+pygame.display.set_caption("N Bodies")
 clock = pygame.time.Clock()
 
 font = pygame.font.SysFont(None, 20)
@@ -30,7 +30,7 @@ bodies = [
         "color": (255, 180, 180),
         "ax": 0,
         "ay": 0,
-        "trail": []
+        "trail": [],
     },
     # Star B
     {
@@ -43,7 +43,7 @@ bodies = [
         "color": (180, 180, 255),
         "ax": 0,
         "ay": 0,
-        "trail": []
+        "trail": [],
     },
     # Third body (outer orbit)
     {
@@ -56,8 +56,21 @@ bodies = [
         "color": (180, 255, 180),
         "ax": 0,
         "ay": 0,
-        "trail": []
+        "trail": [],
     },
+    # nth body(n = 4)
+    {
+        "x": width // 2,
+        "y": height // 2,
+        "vx": -45,
+        "vy": -45,
+        "m": 15000,
+        "r": 6,
+        "color": (255, 255, 180),
+        "ax": 0,
+        "ay": 0,
+        "trail": [],
+    }
 ]
 
 # Zero total momentum (center-of-mass frame)
@@ -73,7 +86,7 @@ for b in bodies:
 running = True
 while running:
     clock.tick(fps)
-    dt = 1/60
+    dt = 1 / 60
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -123,7 +136,7 @@ while running:
         b["x"] += b["vx"] * dt
         b["y"] += b["vy"] * dt
 
-        b["trail"].append((b["x"],b["y"]))
+        b["trail"].append((b["x"], b["y"]))
         if len(b["trail"]) > 300:
             b["trail"].pop(0)
 
@@ -132,46 +145,28 @@ while running:
 
     for body in bodies:
         if len(body["trail"]) > 1:
-            pygame.draw.lines(
-                screen,
-                body["color"],
-                False,
-                body["trail"],
-                1
-            )
+            pygame.draw.lines(screen, body["color"], False, body["trail"], 1)
     for body in bodies:
         pygame.draw.circle(
             screen, body["color"], (int(body["x"]), int(body["y"])), body["r"]
         )
 
-    b1 = bodies[0]
-    b2 = bodies[1]
-    b3 = bodies[2]
-    d12 = math.hypot(b1["x"] - b2["x"], b1["y"] - b2["y"])
-    d13 = math.hypot(b1["x"] - b3["x"], b1["y"] - b3["y"])
-    d23 = math.hypot(b2["x"] - b3["x"], b2["y"] - b3["y"])
-    debug_lines = [
-        f"x1: {b1["x"]:.1f}",
-        f"y1: {b1["y"]:.1f}",
-        f"x2: {b2["x"]:.1f}",
-        f"y2: {b2["y"]:.1f}",
-        f"x3: {b3["x"]:.1f}",
-        f"y3: {b3["y"]:.1f}",
-        f"vx1: {b1["vx"]:.1f}",
-        f"vy1: {b1["vy"]:.1f}",
-        f"vx2: {b2["vx"]:.1f}",
-        f"vy2: {b2["vy"]:.1f}",
-        f"vx3: {b3["vx"]:.1f}",
-        f"vy3: {b3["vy"]:.1f}",
-        f"m1: {b1["m"]:.1f}",
-        f"m2: {b2["m"]:.1f}",
-        f"m3: {b3["m"]:.1f}",
-        f"G: {G}",
-        f"Distance(1-2): {d12:.1f}",
-        f"Distance(1-3): {d13:.1f}",
-        f"Distance(2-3): {d23:.1f}",
-    ]
+    debug_lines = [f"G: {G}"]
 
+    for idx, b in enumerate(bodies):
+        debug_lines += [
+            f"x{idx+1}: {b['x']:.1f}",
+            f"y{idx+1}: {b['y']:.1f}",
+            f"vx{idx+1}: {b['vx']:.1f}",
+            f"vy{idx+1}: {b['vy']:.1f}",
+            f"m{idx+1}: {b['m']:.1f}",
+        ]
+    for i in range(len(bodies)):
+        for j in range(i + 1, len(bodies)):
+            d = math.hypot(
+                bodies[i]["x"] - bodies[j]["x"], bodies[i]["y"] - bodies[j]["y"]
+            )
+            debug_lines.append(f"Dist({i+1}-{j+1}): {d:.1f}")
     y_offset = 10
     for line in debug_lines:
         text_surface = font.render(line, True, (255, 255, 255))
