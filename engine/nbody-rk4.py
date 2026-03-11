@@ -1,6 +1,7 @@
 import pygame
 import sys
 import math
+import json
 
 # Configuration
 width, height = 800, 600
@@ -17,61 +18,15 @@ clock = pygame.time.Clock()
 
 font = pygame.font.SysFont(None, 20)
 
-# Body definitions
-bodies = [
-    # Star A
-    {
-        "x": width // 2 - 60,
-        "y": height // 2,
-        "vx": 45,
-        "vy": -45,
-        "m": 15000,
-        "r": 6,
-        "color": (255, 180, 180),
-        "ax": 0,
-        "ay": 0,
-        "trail": [],
-    },
-    # Star B
-    {
-        "x": width // 2 + 60,
-        "y": height // 2,
-        "vx": -45,
-        "vy": 45,
-        "m": 15000,
-        "r": 6,
-        "color": (180, 180, 255),
-        "ax": 0,
-        "ay": 0,
-        "trail": [],
-    },
-    # Third body (outer orbit)
-    {
-        "x": width // 2,
-        "y": height // 2 - 180,
-        "vx": -45,
-        "vy": -45,
-        "m": 15000,
-        "r": 6,
-        "color": (180, 255, 180),
-        "ax": 0,
-        "ay": 0,
-        "trail": [],
-    },
-    # nth body(n = 4)
-    {
-        "x": width // 2,
-        "y": height // 2,
-        "vx": -45,
-        "vy": -45,
-        "m": 15000,
-        "r": 6,
-        "color": (255, 255, 180),
-        "ax": 0,
-        "ay": 0,
-        "trail": [],
-    }
-]
+# import body definitions
+with open("bodies.json") as f:
+    bodies = json.load(f)
+
+for b in bodies:
+    b["trail"] = []
+    b["ax"] = 0
+    b["ay"] = 0
+    b["color"] = tuple(b["color"])
 
 # Zero total momentum (center-of-mass frame)
 px = sum(b["m"] * b["vx"] for b in bodies)
