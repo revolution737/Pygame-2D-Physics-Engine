@@ -2,6 +2,17 @@ import pygame
 import sys
 import math
 import json
+import matplotlib.pyplot as plt
+import time
+
+start_time = time.time()
+time_limit = 60
+
+plt.ion()
+fig, ax = plt.subplots()
+energy_data = []
+time_data = []
+t = 0
 
 # Configuration
 width, height = 800, 600
@@ -13,7 +24,7 @@ G = 60.0
 # Initialization
 pygame.init()
 screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption("N Bodies")
+pygame.display.set_caption("N Bodies by Euler Integration")
 clock = pygame.time.Clock()
 
 font = pygame.font.SysFont(None, 20)
@@ -37,9 +48,31 @@ for b in bodies:
     b["vx"] -= px / total_mass
     b["vy"] -= py / total_mass
 
+
+def total_energy(state, bodies):
+    ke = 0
+    for i in range(len(bodies)):
+        vx, vy = state[i * 4 + 2], state[i * 4 + 3]
+        ke += 0.5 * bodies[i]["m"] * (vx**2 + vy**2)
+
+    pe = 0
+    for i in range(len(bodies)):
+        for j in range(i + 1, len(bodies)):
+            dx = state[j * 4] - state[i * 4]
+            dy = state[j * 4 + 1] - state[i * 4 + 1]
+            dist = math.hypot(dx, dy)
+            if dist == 0:
+                continue
+            pe -= G * bodies[i]["m"] * bodies[j]["m"] / dist
+
+    return ke + pe
+
+
 # Main Loop
 running = True
 while running:
+    if time.time() - start_time > time_limit:
+        running = False
     clock.tick(fps)
     dt = 1 / 60
 
@@ -51,6 +84,7 @@ while running:
     for b in bodies:
         b["ax"] = 0
         b["ay"] = 0
+
     # Physics update
     for i in range(len(bodies)):
         for j in range(i + 1, len(bodies)):
@@ -69,7 +103,7 @@ while running:
             ux = dx / distance
             uy = dy / distance
 
-            softenting = 20
+            softenting = 5
             force = (
                 G * bi["m"] * bj["m"] / (distance * distance + softenting * softenting)
             )
@@ -94,6 +128,23 @@ while running:
         b["trail"].append((b["x"], b["y"]))
         if len(b["trail"]) > 300:
             b["trail"].pop(0)
+
+    # Build state from bodies for energy calculation
+    state = []
+    for b in bodies:
+        state += [b["x"], b["y"], b["vx"], b["vy"]]
+
+    t += dt
+    energy_data.append(total_energy(state, bodies))
+    time_data.append(t)
+
+    if len(time_data) % 60 == 0:
+        ax.cla()
+        ax.plot(time_data, energy_data)
+        ax.set_title("Total Energy - Euler")
+        ax.set_xlabel("Time")
+        ax.set_ylabel("Energy")
+        plt.pause(0.001)
 
     # Render
     screen.fill(bgcolor)
@@ -122,6 +173,7 @@ while running:
                 bodies[i]["x"] - bodies[j]["x"], bodies[i]["y"] - bodies[j]["y"]
             )
             debug_lines.append(f"Dist({i+1}-{j+1}): {d:.1f}")
+
     y_offset = 10
     for line in debug_lines:
         text_surface = font.render(line, True, (255, 255, 255))
@@ -133,4 +185,6 @@ while running:
 
 # Shutdown
 pygame.quit()
+plt.ioff()
+plt.show()
 sys.exit()

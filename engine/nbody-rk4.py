@@ -2,6 +2,17 @@ import pygame
 import sys
 import math
 import json
+import matplotlib.pyplot as plt
+import time
+
+start_time = time.time()
+time_limit = 60
+
+plt.ion()
+fig, ax = plt.subplots()
+energy_data = []
+time_data = []
+t = 0
 
 # Configuration
 width, height = 800, 600
@@ -13,7 +24,7 @@ G = 60.0
 # Initialization
 pygame.init()
 screen = pygame.display.set_mode((width, height))
-pygame.display.set_caption("N Bodies")
+pygame.display.set_caption("N Bodies by Runge-Kutta 4 Integration")
 clock = pygame.time.Clock()
 
 font = pygame.font.SysFont(None, 20)
@@ -59,7 +70,7 @@ def derivatives(state):
             if distance == 0:
                 continue
 
-            softenting = 20
+            softenting = 5
             force = G * bodies[i]["m"] * bodies[j]["m"] / (distance * distance + softenting * softenting)
 
             ax[i] += force * (dx / distance) / bodies[i]["m"]
@@ -85,9 +96,28 @@ def rk4_step(state, dt):
         for i in range(len(state))
     ]
 
+
+def total_energy(state, bodies):
+    ke = 0
+    for i in range(len(bodies)):
+        vx, vy = state[i * 4 + 2], state[i * 4 + 3]
+        ke += 0.5 * bodies[i]["m"] * (vx**2 + vy**2)
+
+    pe = 0
+    for i in range(len(bodies)):
+        for j in range(i + 1, len(bodies)):
+            dx = state[j * 4] - state[i * 4]
+            dy = state[j * 4 + 1] - state[i * 4 + 1]
+            dist = math.hypot(dx, dy)
+            pe -= G * bodies[i]["m"] * bodies[j]["m"] / dist
+
+    return ke + pe
+
 # Main Loop
 running = True
 while running:
+    if time.time() - start_time > time_limit:
+        running = False
     clock.tick(fps)
     dt = 1/60
 
@@ -117,6 +147,18 @@ while running:
             screen, body["color"], (int(body["x"]), int(body["y"])), body["r"]
         )
 
+    t += dt
+    energy_data.append(total_energy(state, bodies))
+    time_data.append(t)
+
+    if len(time_data) % 60 == 0:
+        ax.cla()
+        ax.plot(time_data, energy_data)
+        ax.set_title("Total Energy - RK4")
+        ax.set_xlabel("Time")
+        ax.set_ylabel("Energy")
+        plt.pause(0.001)
+
     debug_lines = [f"G: {G}"]
 
     for idx, b in enumerate(bodies):
@@ -144,4 +186,6 @@ while running:
 
 # Shutdown
 pygame.quit()
+plt.ioff()
+plt.show()
 sys.exit()
